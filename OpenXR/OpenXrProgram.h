@@ -25,17 +25,12 @@ namespace sample {
 
         // List of color pixel formats supported by this app.
         virtual const std::vector<DXGI_FORMAT>& SupportedColorFormats() const = 0;
-        virtual const std::vector<DXGI_FORMAT>& SupportedDepthFormats() const = 0;
 
         // Render to swapchain images using stereo image array
         virtual void RenderView(const XrRect2Di& imageRect,
-                                const float renderTargetClearColor[4],
                                 const std::vector<xr::math::ViewProjection>& viewProjections,
                                 DXGI_FORMAT colorSwapchainFormat,
-                                ID3D11Texture2D* colorTexture,
-                                DXGI_FORMAT depthSwapchainFormat,
-                                ID3D11Texture2D* depthTexture,
-                                const std::vector<const sample::Cube*>& cubes) = 0;
+                                ID3D11Texture2D* colorTexture) = 0;
     };
 
     std::unique_ptr<IGraphicsPluginD3D11> CreateCubeGraphics();

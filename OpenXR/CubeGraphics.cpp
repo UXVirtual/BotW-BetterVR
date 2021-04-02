@@ -14,37 +14,9 @@ namespace {
             XrVector3f Color;
         };
 
-        constexpr XrVector3f Red{1, 0, 0};
-        constexpr XrVector3f DarkRed{0.25f, 0, 0};
-        constexpr XrVector3f Green{0, 1, 0};
-        constexpr XrVector3f DarkGreen{0, 0.25f, 0};
-        constexpr XrVector3f Blue{0, 0, 1};
-        constexpr XrVector3f DarkBlue{0, 0, 0.25f};
-
-        // Vertices for a 1x1x1 meter cube. (Left/Right, Top/Bottom, Front/Back)
-        constexpr XrVector3f LBB{-0.5f, -0.5f, -0.5f};
-        constexpr XrVector3f LBF{-0.5f, -0.5f, 0.5f};
-        constexpr XrVector3f LTB{-0.5f, 0.5f, -0.5f};
-        constexpr XrVector3f LTF{-0.5f, 0.5f, 0.5f};
-        constexpr XrVector3f RBB{0.5f, -0.5f, -0.5f};
-        constexpr XrVector3f RBF{0.5f, -0.5f, 0.5f};
-        constexpr XrVector3f RTB{0.5f, 0.5f, -0.5f};
-        constexpr XrVector3f RTF{0.5f, 0.5f, 0.5f};
-
-#define CUBE_SIDE(V1, V2, V3, V4, V5, V6, COLOR) {V1, COLOR}, {V2, COLOR}, {V3, COLOR}, {V4, COLOR}, {V5, COLOR}, {V6, COLOR},
-
-        constexpr Vertex c_cubeVertices[] = {
-            CUBE_SIDE(LTB, LBF, LBB, LTB, LTF, LBF, DarkRed)   // -X
-            CUBE_SIDE(RTB, RBB, RBF, RTB, RBF, RTF, Red)       // +X
-            CUBE_SIDE(LBB, LBF, RBF, LBB, RBF, RBB, DarkGreen) // -Y
-            CUBE_SIDE(LTB, RTB, RTF, LTB, RTF, LTF, Green)     // +Y
-            CUBE_SIDE(LBB, RBB, RTB, LBB, RTB, LTB, DarkBlue)  // -Z
-            CUBE_SIDE(LBF, LTF, RTF, LBF, RTF, RBF, Blue)      // +Z
-        };
-
         // Winding order is clockwise. Each side uses a different color.
-        constexpr unsigned short c_cubeIndices[] = {
-            0,  1,  2,  2,  1,  3,  // screen 0
+        constexpr unsigned short screenIndices[] = {
+            0,  1,  2,  2,  1,  3,
         };
 
         struct ViewProjectionConstantBuffer {
@@ -123,45 +95,28 @@ namespace {
 
         void InitializeD3DResources(IDXGIAdapter1 *adapter) {
             const winrt::com_ptr<ID3DBlob> vertexShaderBytes = sample::dx::CompileShader(CubeShader::ShaderHlsl, "MainVS", "vs_5_0");
-            CHECK_HRCMD(m_device->CreateVertexShader(
-                vertexShaderBytes->GetBufferPointer(), vertexShaderBytes->GetBufferSize(), nullptr, m_vertexShader.put()));
+            CHECK_HRCMD(m_device->CreateVertexShader(vertexShaderBytes->GetBufferPointer(), vertexShaderBytes->GetBufferSize(), nullptr, m_vertexShader.put()));
 
             const winrt::com_ptr<ID3DBlob> pixelShaderBytes = sample::dx::CompileShader(CubeShader::ShaderHlsl, "MainPS", "ps_5_0");
-            CHECK_HRCMD(m_device->CreatePixelShader(
-                pixelShaderBytes->GetBufferPointer(), pixelShaderBytes->GetBufferSize(), nullptr, m_pixelShader.put()));
+            CHECK_HRCMD(m_device->CreatePixelShader(pixelShaderBytes->GetBufferPointer(), pixelShaderBytes->GetBufferSize(), nullptr, m_pixelShader.put()));
 
             const D3D11_INPUT_ELEMENT_DESC vertexDesc[] = {
                 {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
                 {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
             };
 
-            CHECK_HRCMD(m_device->CreateInputLayout(vertexDesc,
-                                                    (UINT)std::size(vertexDesc),
-                                                    vertexShaderBytes->GetBufferPointer(),
-                                                    vertexShaderBytes->GetBufferSize(),
-                                                    m_inputLayout.put()));
+            CHECK_HRCMD(m_device->CreateInputLayout(vertexDesc, (UINT)std::size(vertexDesc), vertexShaderBytes->GetBufferPointer(), vertexShaderBytes->GetBufferSize(), m_inputLayout.put()));
 
             const CD3D11_BUFFER_DESC viewportSizeConstantBufferDesc(sizeof(CubeShader::ViewProjectionConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
             CHECK_HRCMD(m_device->CreateBuffer(&viewportSizeConstantBufferDesc, nullptr, m_viewportSizeCBuffer.put()));
 
-            const D3D11_SUBRESOURCE_DATA vertexBufferData{CubeShader::c_cubeVertices};
-            const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(CubeShader::c_cubeVertices), D3D11_BIND_VERTEX_BUFFER);
-            CHECK_HRCMD(m_device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, m_cubeVertexBuffer.put()));
-
-            const D3D11_SUBRESOURCE_DATA indexBufferData{CubeShader::c_cubeIndices};
-            const CD3D11_BUFFER_DESC indexBufferDesc(sizeof(CubeShader::c_cubeIndices), D3D11_BIND_INDEX_BUFFER);
+            const D3D11_SUBRESOURCE_DATA indexBufferData{CubeShader::screenIndices};
+            const CD3D11_BUFFER_DESC indexBufferDesc(sizeof(CubeShader::screenIndices), D3D11_BIND_INDEX_BUFFER);
             CHECK_HRCMD(m_device->CreateBuffer(&indexBufferDesc, &indexBufferData, m_cubeIndexBuffer.put()));
 
             D3D11_FEATURE_DATA_D3D11_OPTIONS3 options;
             m_device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS3, &options, sizeof(options));
-            CHECK_MSG(options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer,
-                      "This sample requires VPRT support. Adjust sample shaders on GPU without VRPT.");
-
-            CD3D11_DEPTH_STENCIL_DESC depthStencilDesc(CD3D11_DEFAULT{});
-            depthStencilDesc.DepthEnable = true;
-            depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-            depthStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER;
-            CHECK_HRCMD(m_device->CreateDepthStencilState(&depthStencilDesc, m_reversedZDepthNoStencilTest.put()));
+            CHECK_MSG(options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer, "This sample requires VPRT support. Adjust sample shaders on GPU without VRPT.");
 
             m_initialTextureDesc.Height = 1080;
             m_initialTextureDesc.Width = 1080;
@@ -189,30 +144,14 @@ namespace {
             return SupportedColorFormats;
         }
 
-        const std::vector<DXGI_FORMAT>& SupportedDepthFormats() const override {
-            const static std::vector<DXGI_FORMAT> SupportedDepthFormats = {
-                DXGI_FORMAT_D32_FLOAT,
-                DXGI_FORMAT_D16_UNORM,
-                DXGI_FORMAT_D24_UNORM_S8_UINT,
-                DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
-            };
-            return SupportedDepthFormats;
-        }
-
         void RenderView(const XrRect2Di& imageRect,
-                        const float renderTargetClearColor[4],
                         const std::vector<xr::math::ViewProjection>& viewProjections,
                         DXGI_FORMAT colorSwapchainFormat,
-                        ID3D11Texture2D* colorTexture,
-                        DXGI_FORMAT depthSwapchainFormat,
-                        ID3D11Texture2D* depthTexture,
-                        const std::vector<const sample::Cube*>& cubes) override {
+                        ID3D11Texture2D* colorTexture) override {
             const uint32_t viewInstanceCount = (uint32_t)viewProjections.size();
-            CHECK_MSG(viewInstanceCount <= CubeShader::MaxViewInstance,
-                      "Sample shader supports 2 or fewer view instances. Adjust shader to accommodate more.")
+            CHECK_MSG(viewInstanceCount <= CubeShader::MaxViewInstance, "Sample shader supports 2 or fewer view instances. Adjust shader to accommodate more.")
 
-            CD3D11_VIEWPORT viewport(
-                (float)imageRect.offset.x, (float)imageRect.offset.y, (float)imageRect.extent.width, (float)imageRect.extent.height);
+            CD3D11_VIEWPORT viewport((float)imageRect.offset.x, (float)imageRect.offset.y, (float)imageRect.extent.width, (float)imageRect.extent.height);
             m_deviceContext->RSSetViewports(1, &viewport);
 
             // Create RenderTargetView with the original swapchain format (swapchain image is typeless).
@@ -220,21 +159,12 @@ namespace {
             const CD3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc(D3D11_RTV_DIMENSION_TEXTURE2DARRAY, colorSwapchainFormat);
             CHECK_HRCMD(m_device->CreateRenderTargetView(colorTexture, &renderTargetViewDesc, renderTargetView.put()));
 
-            // Create a DepthStencilView with the original swapchain format (swapchain image is typeless)
-            winrt::com_ptr<ID3D11DepthStencilView> depthStencilView;
-            CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2DARRAY, depthSwapchainFormat);
-            CHECK_HRCMD(m_device->CreateDepthStencilView(depthTexture, &depthStencilViewDesc, depthStencilView.put()));
-
-            const bool reversedZ = viewProjections[0].NearFar.Near > viewProjections[0].NearFar.Far;
-            const float depthClearValue = reversedZ ? 0.f : 1.f;
-
-            // Clear swapchain and depth buffer. NOTE: This will clear the entire render target view, not just the specified view.
-            m_deviceContext->ClearRenderTargetView(renderTargetView.get(), renderTargetClearColor);
-            m_deviceContext->ClearDepthStencilView(depthStencilView.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depthClearValue, 0);
-            m_deviceContext->OMSetDepthStencilState(reversedZ ? m_reversedZDepthNoStencilTest.get() : nullptr, 0);
+            // Clear swapchain. NOTE: This will clear the entire render target view, not just the specified view.
+            constexpr DirectX::XMVECTORF32 transparent = { 1.000000000f, 1.000000000f, 1.000000000f, 1.000000000f };
+            m_deviceContext->ClearRenderTargetView(renderTargetView.get(), transparent);
 
             ID3D11RenderTargetView* renderTargets[] = {renderTargetView.get()};
-            m_deviceContext->OMSetRenderTargets((UINT)std::size(renderTargets), renderTargets, depthStencilView.get());
+            m_deviceContext->OMSetRenderTargets((UINT)std::size(renderTargets), renderTargets, NULL);
 
             if (getCemuHWND() != NULL && getHookMode() == HOOK_MODE::GFX_PACK_ENABLED || getHookMode() == HOOK_MODE::BOTH_ENABLED_PRECALC || getHookMode() == HOOK_MODE::BOTH_ENABLED_GFX_CALC) {
                 if (m_setup_not_done) {
@@ -329,16 +259,11 @@ namespace {
             m_deviceContext->VSSetShader(m_vertexShader.get(), nullptr, 0);
             m_deviceContext->PSSetShader(m_pixelShader.get(), nullptr, 0);
 
-
-            const UINT strides[] = { sizeof(CubeShader::Vertex) };
-            const UINT offsets[] = { 0 };
-            ID3D11Buffer* vertexBuffers[] = { m_cubeVertexBuffer.get() };
-            m_deviceContext->IASetVertexBuffers(0, (UINT)std::size(vertexBuffers), vertexBuffers, strides, offsets);
             m_deviceContext->IASetIndexBuffer(m_cubeIndexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
             m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             m_deviceContext->IASetInputLayout(m_inputLayout.get());
 
-            m_deviceContext->DrawIndexedInstanced((UINT)std::size(CubeShader::c_cubeIndices), viewInstanceCount, 0, 0, 0);
+            m_deviceContext->DrawIndexedInstanced((UINT)std::size(CubeShader::screenIndices), viewInstanceCount, 0, 0, 0);
 
             if (!m_setup_not_done) m_dxgiOutputApplication->ReleaseFrame();
         }
@@ -351,9 +276,7 @@ namespace {
         winrt::com_ptr<ID3D11PixelShader> m_pixelShader;
         winrt::com_ptr<ID3D11InputLayout> m_inputLayout;
         winrt::com_ptr<ID3D11Buffer> m_viewportSizeCBuffer;
-        winrt::com_ptr<ID3D11Buffer> m_cubeVertexBuffer;
         winrt::com_ptr<ID3D11Buffer> m_cubeIndexBuffer;
-        winrt::com_ptr<ID3D11DepthStencilState> m_reversedZDepthNoStencilTest;
 
         winrt::com_ptr<IDXGIOutputDuplication> m_dxgiOutputApplication;
         winrt::com_ptr<ID3D11Texture2D> m_initialTexture;
