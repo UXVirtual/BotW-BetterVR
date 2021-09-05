@@ -151,7 +151,9 @@ void cameraHookUpdate(PPCInterpreter_t* hCPU) {
 	swapGraphicPackDataEndianness(&inputData);
 
 	XrView* currView = currSwapSide == SWAP_SIDE::RIGHT ? &leftView : &rightView;
-	glm::fvec3 hmdPos(currView->pose.position.x, currView->pose.position.y, currView->pose.position.z);
+	glm::fvec3 eyePos(currView->pose.position.x, currView->pose.position.y, currView->pose.position.z);
+
+	glm::fvec3 hmdPos((leftView.pose.position.x + rightView.pose.position.x) / 2, (leftView.pose.position.y + rightView.pose.position.y) / 2, (leftView.pose.position.z + rightView.pose.position.z) / 2);
 
 	glm::fvec3 oldPosition(inputData.oldPosX, inputData.oldPosY, inputData.oldPosZ);
 	glm::fvec3 oldTarget(inputData.oldTargetX, inputData.oldTargetY, inputData.oldTargetZ);
@@ -165,7 +167,7 @@ void cameraHookUpdate(PPCInterpreter_t* hCPU) {
 	glm::fquat combinedQuat = lookAtQuat * hmdQuat;
 	glm::fmat3 combinedMatrix = glm::toMat3(hmdQuat);
 
-	glm::fvec3 rotatedHmdPos = glm::toMat3(combinedQuat) * hmdPos;
+	glm::fvec3 rotatedHmdPos = glm::toMat3(combinedQuat) * eyePos;
 
 
 	inputData.newPosX = inputData.oldPosX + (hmdPos.x * inputData.headPositionSensitivitySetting);
@@ -202,6 +204,7 @@ void cameraHookUpdate(PPCInterpreter_t* hCPU) {
 	float horizontalFullFovInRadians = 2.0f * atanf(horizontalHalfFOV);
 	float aspectRatioCompare = tanf(diagonalFOV / 2.0f);
 	float aspectRatio = horizontalHalfFOV / verticalHalfFOV; //horizontalHalfFOV / verticalHalfFOV;
+
 
 	//logPrint(std::string("Horizontal FOV in degrees is ") + std::to_string(glm::degrees(horizontalFOV)) + std::string(" and in radians (as used by OpenXR) ") + std::to_string(horizontalFOV));
 	//logPrint(std::string("Vertical FOV in degrees is ") + std::to_string(glm::degrees(verticalFOV)) + std::string(" and in radians (as used by OpenXR) ") + std::to_string(verticalFOV));
