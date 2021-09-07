@@ -8,6 +8,7 @@ typedef void (*osLib_registerHLEFunctionType)(const char* libraryName, const cha
 
 struct graphicPackData {
 	int32_t viewMode;
+	int32_t firstPersonCameraMovement;
 	int32_t swappedFlipSideSetting;
 	float eyeSeparation;
 	float headPositionSensitivitySetting;
@@ -81,6 +82,7 @@ void cameraInitialize() {
 
 void swapGraphicPackDataEndianness(graphicPackData* data) {
 	swapEndianness(data->viewMode);
+	swapEndianness(data->firstPersonCameraMovement);
 	swapEndianness(data->swappedFlipSideSetting);
 	swapEndianness(data->eyeSeparation);
 	swapEndianness(data->headPositionSensitivitySetting);
@@ -196,10 +198,20 @@ void cameraHookUpdate(PPCInterpreter_t* hCPU) {
 		inputData.newPosY = linkData.posY;
 		inputData.newPosZ = linkData.posZ;
 
-		inputData.newPosX -= (hmdPos.x - eyePos.x);
-		inputData.newPosY -= (hmdPos.y - eyePos.y);
-		inputData.newPosY += hmdPos.y; // We want to factor in the hmd position
-		inputData.newPosZ -= (hmdPos.z - eyePos.z);
+		if (inputData.firstPersonCameraMovement) {
+			inputData.newPosX -= (hmdPos.x - eyePos.x);
+			inputData.newPosX += hmdPos.x; // factor in
+			inputData.newPosY -= (hmdPos.y - eyePos.y);
+			inputData.newPosY += hmdPos.y; // every single
+			inputData.newPosZ -= (hmdPos.z - eyePos.z);
+			inputData.newPosZ += hmdPos.z; // coord value
+		}
+		else {
+			inputData.newPosX -= (hmdPos.x - eyePos.x);
+			inputData.newPosY -= (hmdPos.y - eyePos.y);
+			inputData.newPosY += hmdPos.y; // Factor in the hmd y-pos only
+			inputData.newPosZ -= (hmdPos.z - eyePos.z);
+		}
 	}
 	else {
 		inputData.newPosX = inputData.oldPosX + (hmdPos.x * inputData.headPositionSensitivitySetting) - (hmdPos.x - eyePos.x);

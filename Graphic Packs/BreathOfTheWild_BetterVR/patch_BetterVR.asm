@@ -7,6 +7,8 @@ moduleMatches = 0x6267BFD0
 startGraphicPackData:
 ViewMode:
 .int $mode
+FirstPersonCameraMovement:
+.int $firstPersonCameraMovement
 SwappedFlipSideSetting:
 .int $swappedFlipSide
 EyeSeparationSetting:

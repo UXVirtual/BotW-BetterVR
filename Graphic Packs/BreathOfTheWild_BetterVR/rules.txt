@@ -9,6 +9,7 @@ version = 7
 $mode:int = 0
 $FOV = 0.872665
 $cameraDistance = 0.1
+$firstPersonCameraMovement:int = 0
 $linkOpacity = 1.0
 $hudScale = 0.4
 $menuScale = 0.4
@@ -67,6 +68,21 @@ name = Extreme
 category = Camera Distance
 condition = $mode == 0
 $cameraDistance = 0.9
+
+# Whether or not to allow the user to walk around
+
+[Preset]
+name = Don't Allow (Default)
+category = Allow Hmd-Based Camera Movement?
+condition = $mode == 1
+default = 1
+$firstPersonCameraMovement = 0
+
+[Preset]
+name = Allow
+category = Allow Hmd-Based Camera Movement?
+condition = $mode == 1
+$firstPersonCameraMovement = 1
 
 # Field Of View
 
@@ -171,25 +187,29 @@ $swappedFlipSide = 0
 [Preset]
 name = Ant
 category = Player Size
+condition = $mode == 0
 $headPositionSensitivity = 0.1
 
 [Preset]
 name = Half-Size
 category = Player Size
+condition = $mode == 0
 $headPositionSensitivity = 0.5
 
 [Preset]
 name = Normal (Default)
 category = Player Size
+condition = $mode == 0
 $headPositionSensitivity = 1.4
 
 [Preset]
 name = Big
 category = Player Size
+condition = $mode == 0
 $headPositionSensitivity = 5.0
-
 
 [Preset]
 name = Very Much Big.. Yes Very Big
 category = Player Size
+condition = $mode == 0
 $headPositionSensitivity = 10.0
