@@ -7,6 +7,7 @@ std::atomic<RENDER_STATUS> currRenderStatus = RENDER_STATUS::WAITING;
 typedef void (*osLib_registerHLEFunctionType)(const char* libraryName, const char* functionName, void(*osFunction)(PPCInterpreter_t* hCPU));
 
 struct graphicPackData {
+	int32_t viewMode;
 	int32_t swappedFlipSideSetting;
 	float eyeSeparation;
 	float headPositionSensitivitySetting;
@@ -60,6 +61,7 @@ void cameraInitialize() {
 }
 
 void swapGraphicPackDataEndianness(graphicPackData* data) {
+	swapEndianness(data->viewMode);
 	swapEndianness(data->swappedFlipSideSetting);
 	swapEndianness(data->eyeSeparation);
 	swapEndianness(data->headPositionSensitivitySetting);
@@ -136,10 +138,7 @@ void cameraHookFrame(PPCInterpreter_t* hCPU) {
 
 	framesSinceLastCameraUpdate++;
 }
-//long long thing = 0;                                                                                                                                        |
 void cameraHookUpdate(PPCInterpreter_t* hCPU) {
-	//logPrint(std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() - thing));   |  Uncomment these lines for frame time logging
-	//thing = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();                             |
 	//logPrint("Updated the camera positions");
 	hCPU->instructionPointer = hCPU->gpr[7]; // r7 will have the instruction that should be returned to
 
@@ -170,8 +169,28 @@ void cameraHookUpdate(PPCInterpreter_t* hCPU) {
 	glm::fmat3 combinedMatrix = glm::toMat3(hmdQuat);
 
 	glm::fvec3 rotatedHmdPos = glm::toMat3(combinedQuat) * eyePos;
+	
+	if (inputData.viewMode == 1) {
+		readMemory(0x1055300C + 0x0, &inputData.newPosX);
+		readMemory(0x1055300C + 0x4, &inputData.newPosY);
+		readMemory(0x1055300C + 0x8, &inputData.newPosZ);
 
 
+		swapEndianness(inputData.newPosX); // readMemoryBE() seems to be broken, it outputs the same stuff as readMemory.
+		swapEndianness(inputData.newPosY); // I might fix it later.
+		swapEndianness(inputData.newPosZ);
+
+		inputData.newPosX -= (hmdPos.x - eyePos.x);
+		inputData.newPosY -= (hmdPos.y - eyePos.y);
+		inputData.newPosY += hmdPos.y; // We want to factor in the hmd position
+		inputData.newPosZ -= (hmdPos.z - eyePos.z);
+	}
+	else {
+		inputData.newPosX = inputData.oldPosX + (hmdPos.x * inputData.headPositionSensitivitySetting) - (hmdPos.x - eyePos.x);
+		inputData.newPosY = inputData.oldPosY + (hmdPos.y * inputData.headPositionSensitivitySetting) - (hmdPos.y - eyePos.y);
+		inputData.newPosZ = inputData.oldPosZ + (hmdPos.z * inputData.headPositionSensitivitySetting) - (hmdPos.z - eyePos.z);
+	}
+	
 	inputData.newPosX = inputData.oldPosX + (hmdPos.x * inputData.headPositionSensitivitySetting) + (hmdPos.x - eyePos.x);
 	inputData.newPosY = inputData.oldPosY + (hmdPos.y * inputData.headPositionSensitivitySetting) + (hmdPos.y - eyePos.y)/* + (inputData.heightPositionOffsetSetting * inputData.headPositionSensitivitySetting)*/;
 	inputData.newPosZ = inputData.oldPosZ + (hmdPos.z * inputData.headPositionSensitivitySetting) + (hmdPos.z - eyePos.z);

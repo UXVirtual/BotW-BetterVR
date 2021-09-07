@@ -5,6 +5,8 @@ moduleMatches = 0x6267BFD0
 
 ; Additional settings
 startGraphicPackData:
+ViewMode:
+.int $mode
 SwappedFlipSideSetting:
 .int $swappedFlipSide
 EyeSeparationSetting:
