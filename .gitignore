@@ -41,3 +41,5 @@ OpenXR/Debug/
 
 /Cemu/*
 !/Cemu/.gitkeep
+
+ReverseEngineering/
