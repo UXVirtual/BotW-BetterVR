@@ -44,3 +44,5 @@ CemuTest/
 !/Cemu/.gitkeep
 
 ReverseEngineering/
+
+cmake-build-*/

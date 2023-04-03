@@ -1,0 +1,5 @@
+set VK_LAYER_PATH=.\;%VK_LAYER_PATH%
+set VK_INSTANCE_LAYERS=VK_LAYER_BetterVR_Layer
+set VK_LOADER_DEBUG=all
+set VK_LOADER_DISABLE_INST_EXT_FILTER=1
+@start "" ".\Cemu.exe"
