@@ -202,7 +202,7 @@ void OpenXR::UpdatePoses(EyeSide side) {
     XrViewLocateInfo viewLocateInfo = { XR_TYPE_VIEW_LOCATE_INFO };
     viewLocateInfo.viewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
     viewLocateInfo.displayTime = m_frameTimes[std::to_underlying(side)];
-    viewLocateInfo.space = m_headSpace;
+    viewLocateInfo.space = m_stageSpace;
     XrViewState viewState = { XR_TYPE_VIEW_STATE };
     uint32_t viewCount = views.size();
     checkXRResult(xrLocateViews(m_session, &viewLocateInfo, &viewState, viewCount, &viewCount, views.data()), "Failed to get view information!");
