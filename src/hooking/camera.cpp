@@ -32,6 +32,8 @@ OpenXR::EyeSide s_currentEye = OpenXR::EyeSide::RIGHT;
 std::pair<data_VRCameraRotationOut, OpenXR::EyeSide> s_currentCameraRotation = {};
 data_VRProjectionMatrixOut s_currentProjectionMatrix = {};
 
+glm::fquat g_lookAtQuat;
+
 // todo: for non-EAR versions it should use the same camera inputs for both eyes
 void CemuHooks::hook_UpdateCameraPositionAndTarget(PPCInterpreter_t* hCPU) {
     hCPU->instructionPointer = hCPU->sprNew.LR;
@@ -59,6 +61,8 @@ void CemuHooks::hook_UpdateCameraPositionAndTarget(PPCInterpreter_t* hCPU) {
     // Calculate game view directions
     glm::fvec3 forwardVector = glm::normalize(oldCameraTarget - oldCameraPosition);
     glm::fquat lookAtQuat = glm::quatLookAtRH(forwardVector, { 0.0, 1.0, 0.0 });
+
+    g_lookAtQuat = lookAtQuat;
 
     // Calculate new view direction
     glm::fquat combinedQuat = glm::normalize(lookAtQuat * currEyeQuat);

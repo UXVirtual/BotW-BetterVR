@@ -1,6 +1,8 @@
 #include "../instance.h"
 #include "cemu_hooks.h"
 
+#include <glm/gtx/quaternion.hpp>
+
 struct ActorWiiU {
     uint32_t vtable;
     BEType<uint32_t> baseProcPtr;
@@ -176,12 +178,80 @@ void CemuHooks::updateFrames() {
     }
 }
 
+std::array<std::array<float, 4>, 3> EMPTY_MATRIX = { { { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f } } };
+
+extern glm::fquat g_lookAtQuat;
+extern OpenXR::EyeSide s_currentEye;
+
+void vrhook_changeWeaponMtx(BEMatrix34& toBeAdjustedMtx, BEMatrix34& defaultMtx) {
+    // toBeAdjustedMtx = defaultMtx;
+
+    XrPosef rightHandPose = VRManager::instance().XR->m_input.controllers[OpenXR::RIGHT].poseLocation.pose;
+
+    glm::fvec3 controllerPos(
+        rightHandPose.position.x,
+        rightHandPose.position.y,
+        rightHandPose.position.z
+    );
+    glm::fquat controllerQuat(
+        rightHandPose.orientation.w,
+        rightHandPose.orientation.x,
+        rightHandPose.orientation.y,
+        rightHandPose.orientation.z
+    );
+
+    glm::fquat rotatedControllerQuat = glm::normalize(g_lookAtQuat * controllerQuat);
+    glm::fvec3 rotatedControllerPos = g_lookAtQuat * controllerPos;
+
+
+    glm::fmat3 defaultRotMatrix = {
+        { defaultMtx.x_x, defaultMtx.y_x, defaultMtx.z_x },
+        { defaultMtx.x_y, defaultMtx.y_y, defaultMtx.z_y },
+        { defaultMtx.x_z, defaultMtx.y_z, defaultMtx.z_z }
+    };
+    glm::fquat ingameWeaponQuat = glm::quat_cast(defaultRotMatrix);
+
+    glm::fquat combinedQuat = glm::normalize(ingameWeaponQuat * rotatedControllerQuat);
+
+    glm::fvec3 ingamePos(
+        defaultMtx.pos_x,
+        defaultMtx.pos_y,
+        defaultMtx.pos_z
+    );
+    glm::fvec3 finalPos = ingamePos + rotatedControllerPos;
+
+    toBeAdjustedMtx.pos_x = finalPos.x;
+    toBeAdjustedMtx.pos_y = finalPos.y;
+    toBeAdjustedMtx.pos_z = finalPos.z;
+
+    glm::fmat3 finalMtx = glm::toMat3(ingameWeaponQuat * rotatedControllerQuat);
+
+    toBeAdjustedMtx.x_x = finalMtx[0][0];
+    toBeAdjustedMtx.y_x = finalMtx[0][1];
+    toBeAdjustedMtx.z_x = finalMtx[0][2];
+
+    toBeAdjustedMtx.x_y = finalMtx[1][0];
+    toBeAdjustedMtx.y_y = finalMtx[1][1];
+    toBeAdjustedMtx.z_y = finalMtx[1][2];
+
+    toBeAdjustedMtx.x_z = finalMtx[2][0];
+    toBeAdjustedMtx.y_z = finalMtx[2][1];
+    toBeAdjustedMtx.z_z = finalMtx[2][2];
+}
+
+
+
 void CemuHooks::hook_changeWeaponMtx(PPCInterpreter_t* hCPU) {
     hCPU->instructionPointer = hCPU->sprNew.LR;
 
     // r3 holds an actor pointer, I think?
     // r4 holds the bone name
     // r5 holds the matrix that is to be set
+    // r6 holds the extra matrix that is to be set
+    // r7 holds the ModelBindInfo->mtx
+
+    uint32_t modelBindInfoPtr = hCPU->gpr[7];
+    hCPU->gpr[7] = 0;
 
     uint32_t actorLinkPtr = hCPU->gpr[3] + offsetof(ActorWiiU, baseProcPtr);
     uint32_t actorNamePtr = 0;
@@ -207,14 +277,60 @@ void CemuHooks::hook_changeWeaponMtx(PPCInterpreter_t* hCPU) {
         BEMatrix34 extraMtx = {};
         readMemory(hCPU->gpr[6], &extraMtx);
 
+        BEMatrix34 itemMtx = {};
+        readMemory(modelBindInfoPtr, &itemMtx);
+
+        // move mtx slightly upwards
+        // mtx.y_x = mtx.y_x.getLE() + 5.1f;
+        // mtx.z_x = mtx.z_x.getLE() + 5.1f;
+        // mtx.pos_y = mtx.pos_y.getLE() + 5.1f;
+        // mtx.x_z = mtx.x_z.getLE() + 5.1f;
+
+        // [x_x=-0.005497217, y_x=0, z_x=0.9999848, pos_x=-840.4056] [x_y=0, x_y=1, z_y=0, pos_y=199.16814] [x_z=-0.9999848, y_z=0, z_z=-0.005497217, pos_z=1797.2269]
+        // move extraMtx slightly upwards
+        // extraMtx.pos_x = extraMtx.y_x.getLE() + 5.1f;
+        // extraMtx.pos_y = extraMtx.pos_y.getLE() + 5.1f;
+        // extraMtx.pos_z = extraMtx.pos_z.getLE() + 5.1f;
+
+        XrPosef leftPose = VRManager::instance().XR->GetRenderer()->m_layer3D.GetPose(OpenXR::EyeSide::LEFT);
+        XrPosef rightPose = VRManager::instance().XR->GetRenderer()->m_layer3D.GetPose(OpenXR::EyeSide::RIGHT);
+
+        // if (isRightHandWeapon) {
+        //     auto rightHandPos = VRManager::instance().XR->m_input.controllers[OpenXR::RIGHT].poseLocation.pose.position;
+        //     // todo: rotate/scale the positions of the controllers into world-space, like we did with the camera
+        //     mtx.pos_x = extraMtx.pos_x.getLE() + rightHandPos.x;
+        //     mtx.pos_y = extraMtx.pos_y.getLE() + rightHandPos.y;
+        //     mtx.pos_z = extraMtx.pos_z.getLE() + rightHandPos.z;
+        //     // todo: use glm::quatLookAtRH to calculate the rotation, like we did with the camera
+        //     mtx.x_x = 0.0f;
+        //     mtx.y_x = 0.0f;
+        //     mtx.z_x = 0.0f;
+        //     mtx.x_y = 0.0f;
+        //     mtx.y_y = 0.0f;
+        //     mtx.z_y = 0.0f;
+        //     mtx.x_z = 0.0f;
+        //     mtx.y_z = 0.0f;
+        //     mtx.z_z = 0.0f;
+        // }
+
+        vrhook_changeWeaponMtx(mtx, extraMtx);
+
+        writeMemory(hCPU->gpr[5], &mtx);
+        writeMemory(hCPU->gpr[6], &extraMtx);
+        writeMemory(modelBindInfoPtr, &itemMtx);
+
+        hCPU->gpr[7] = 1;
+
         Log::print("Changing weapon matrix for {} with the bone {}:", actorName, boneName);
         Log::print("  -> destMtx: {}", mtx);
         Log::print("  -> extraMtx: {}", extraMtx);
+        Log::print("  -> itemMtx: {}", itemMtx);
 
         auto& m_overlay = VRManager::instance().VK->m_imguiOverlay;
         if (m_overlay) {
             m_overlay->AddOrUpdateEntity(1337, "PlayerHeldWeapons", isLeftHandWeapon ? "left_mtx" : "right_mtx", hCPU->gpr[5], mtx);
             m_overlay->AddOrUpdateEntity(1337, "PlayerHeldWeapons", isLeftHandWeapon ? "left_extra_mtx" : "right_extra_mtx", hCPU->gpr[6], extraMtx);
+            m_overlay->AddOrUpdateEntity(1337, "PlayerHeldWeapons", isLeftHandWeapon ? "left_item_mtx" : "right_item_mtx", modelBindInfoPtr, itemMtx);
             m_overlay->SetPriority(1337, -1.0f);
 
             // freeze the value so it doesn't get overwritten
@@ -228,21 +344,24 @@ void CemuHooks::hook_changeWeaponMtx(PPCInterpreter_t* hCPU) {
                     extraMtx = std::get<BEMatrix34>(value.value);
                     writeMemory(hCPU->gpr[6], &extraMtx);
                 }
+                else if (value.value_name == (isLeftHandWeapon ? "left_item_mtx" : "right_item_mtx") && value.frozen) {
+                    itemMtx = std::get<BEMatrix34>(value.value);
+                    writeMemory(modelBindInfoPtr, &itemMtx);
+                }
                 else {
-                    // move mtx slightly upwards
-                    mtx.y_x = mtx.y_x.getLE() + 5.1f;
-                    mtx.z_x = mtx.z_x.getLE() + 5.1f;
-                    mtx.pos_y = mtx.pos_y.getLE() + 5.1f;
-                    mtx.x_z = mtx.x_z.getLE() + 5.1f;
-
-                    // [x_x=-0.005497217, y_x=0, z_x=0.9999848, pos_x=-840.4056] [x_y=0, x_y=1, z_y=0, pos_y=199.16814] [x_z=-0.9999848, y_z=0, z_z=-0.005497217, pos_z=1797.2269]
-                    // move extraMtx slightly upwards
-                    extraMtx.pos_x = extraMtx.y_x.getLE() + 5.1f;
-                    extraMtx.pos_y = extraMtx.pos_y.getLE() + 5.1f;
-                    extraMtx.pos_z = extraMtx.pos_z.getLE() + 5.1f;
-
-                    writeMemory(hCPU->gpr[5], &mtx);
-                    writeMemory(hCPU->gpr[6], &extraMtx);
+                    // // move mtx slightly upwards
+                    // mtx.y_x = mtx.y_x.getLE() + 5.1f;
+                    // mtx.z_x = mtx.z_x.getLE() + 5.1f;
+                    // mtx.pos_y = mtx.pos_y.getLE() + 5.1f;
+                    // mtx.x_z = mtx.x_z.getLE() + 5.1f;
+                    //
+                    // // move extraMtx slightly upwards
+                    // extraMtx.pos_x = extraMtx.y_x.getLE() + 5.1f;
+                    // extraMtx.pos_y = extraMtx.pos_y.getLE() + 5.1f;
+                    // extraMtx.pos_z = extraMtx.pos_z.getLE() + 5.1f;
+                    //
+                    // writeMemory(hCPU->gpr[5], &mtx);
+                    // writeMemory(hCPU->gpr[6], &extraMtx);
                 }
             }
         }

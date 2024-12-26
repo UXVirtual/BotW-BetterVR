@@ -12,19 +12,35 @@ mflr r0
 stwu r1, -0x50(r1)
 stw r0, 0x54(r1)
 
+stw r3, 0x1C(r1)
+mr r3, r31
+
 stw r3, 0x08(r1)
 stw r4, 0x0C(r1)
 stw r5, 0x10(r1)
 stw r6, 0x14(r1)
 stw r7, 0x18(r1)
 
+
 ; call C++ code to change the weapon mtx to the hand mtx
-mr r3, r3 ; passes the hackily obtained actor
+lwz r3, 0x1C(r1) ; the actor
 lwz r4, 0x18(r31) ; the char array of the weapon name
-addi r5, r1, 0x10 ; the target MTX
+;addi r5, r1, 0x10 ; the target MTX
+lwz r5, 0x10(r1) ; the target MTX
 addi r6, r29, 0x34 ; the gsysModel->mtx, maybe used for the location?
+;mr r7, r31 ; the to-be-changed MTX
+addi r7, r31, 0x3C ; the mtx of the item supposedly
 bl import.coreinit.hook_changeWeaponMtx
 
+cmpwi r7, 0
+beq noChangeWeaponMtx
+
+lwz r3, 0x6C(r31)
+li r5, 3
+;stw r5, 0x6C(r31)
+
+
+noChangeWeaponMtx:
 lwz r3, 0x08(r1)
 lwz r4, 0x0C(r1)
 lwz r5, 0x10(r1)
@@ -35,13 +51,10 @@ lwz r0, 0x54(r1)
 mtlr r0
 addi r1, r1, 0x50
 
-; original instruction
-lwz r3, 0x58(r1) ; the actor
-mr r3, r31
-
 blr
 
-0x03125438 = li r5, 3
+; this forces all weapons to be static
+;0x03125438 = li r5, 3
 
 0x0312587C = bla changeWeaponMtx
 
