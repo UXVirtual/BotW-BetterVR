@@ -310,6 +310,30 @@ void CemuHooks::hook_EnableWeaponAttackSensor(PPCInterpreter_t* hCPU) {
     }
 }
 
+void CemuHooks::hook_EquipWeapon(PPCInterpreter_t* hCPU) {
+    hCPU->instructionPointer = hCPU->sprNew.LR;
+
+    auto input = VRManager::instance().XR->m_input.load();
+    uint32_t toBeEquipedSlot = hCPU->gpr[25];
+
+    if (toBeEquipedSlot == 0 || toBeEquipedSlot == 1) {
+        hCPU->gpr[25] = (input.inGame.lastPickupSide == OpenXR::EyeSide::LEFT) ? 0 : 1;
+    }
+
+    //switch (hCPU->gpr[25]) {
+    //    case 1: {
+    //        hCPU->gpr[25] = 0;
+    //        break;
+    //    }
+    //    case 0: {
+    //        hCPU->gpr[25] = 1;
+    //    }
+    //    default: {
+    //        break;
+    //    }
+    //}
+}
+
 void CemuHooks::hook_ModifyHandModelAccessSearch(PPCInterpreter_t* hCPU) {
     hCPU->instructionPointer = hCPU->sprNew.LR;
 

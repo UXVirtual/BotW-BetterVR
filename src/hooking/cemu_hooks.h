@@ -34,6 +34,7 @@ public:
         osLib_registerHLEFunction("coreinit", "hook_OSReportToConsole", &hook_OSReportToConsole);
 
         osLib_registerHLEFunction("coreinit", "hook_EnableWeaponAttackSensor", &hook_EnableWeaponAttackSensor);
+        osLib_registerHLEFunction("coreinit", "hook_EquipWeapon", &hook_EquipWeapon);
 
         osLib_registerHLEFunction("coreinit", "hook_updateCameraOLD", &hook_updateCameraOLD);
     };
@@ -74,7 +75,11 @@ private:
     static void hook_ApplyCameraRotation(PPCInterpreter_t* hCPU);
     static void hook_EndCameraSide(PPCInterpreter_t* hCPU);
 
+public:
+    static void DebugTestMotionAnalyser();
+private:
     static void hook_EnableWeaponAttackSensor(PPCInterpreter_t* hCPU);
+    static void hook_EquipWeapon(PPCInterpreter_t* hCPU);
 
     static void hook_OSReportToConsole(PPCInterpreter_t* hCPU);
 
