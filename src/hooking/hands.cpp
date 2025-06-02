@@ -289,15 +289,14 @@ void CemuHooks::hook_EnableWeaponAttackSensor(PPCInterpreter_t* hCPU) {
     s_motionAnalyzers[heldIndex].Update(state.inGame.poseLocation[heldIndex], state.inGame.poseVelocity[heldIndex]);
 
     // 0x3A0 is 0 apparently for armor displays, so prevent null pointer dereference
-    ActorWiiU parentActor = {};
-    readMemory(parentActorPtr, &parentActor);
-    bool hasPhysics = parentActor.actorPhysicsPtr.getLE() != 0;
+    //ActorWiiU parentActor = {};
+    //readMemory(parentActorPtr, &parentActor);
+    //bool hasPhysics = parentActor.actorPhysicsPtr.getLE() != 0;
     // Log::print("! parentActorPtr=0x{:X}, hasPhysics={}", parentActorPtr, hasPhysics);
 
     // Use the analysed motion to determine whether the weapon is swinging or stabbing, and whether the attackSensor should be active this frame
-    // if (isHeldByPlayer && hasPhysics && analyzer->IsHitboxActive()) {
-    if (isHeldByPlayer/*&& hasPhysics*/) {
-        // Log::print("! isHeldByPlayer && hasPhysics: setting up attack sensor");
+    if (isHeldByPlayer && s_motionAnalyzers[heldIndex].IsAttacking()) {
+        Log::print("!! Activate sensor for {}: isHeldByPlayer={}, weaponType={}", heldIndex, isHeldByPlayer, (int)weaponType);
         weapon.setupAttackSensor.resetAttack = 1;
         weapon.setupAttackSensor.mode = 2;
         weapon.setupAttackSensor.isContactLayerInitialized = 0;

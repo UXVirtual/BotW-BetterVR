@@ -4,6 +4,7 @@ moduleMatches = 0x6267BFD0
 .origin = codecave
 
 
+0x0339488C = ksys_act_hasTag:
 
 hook_enableWeapon:
 mflr r0
@@ -21,23 +22,38 @@ mr r4, r3 ; r4 = Actor* parentActor
 stw r3, 0x08(r1) ; store Weapon* in stack
 stw r4, 0x04(r1) ; store Actor* in stack
 
+; check if this is an EquipStand (the weapon stands in Link's house)
+lis r3, ksys_act_hasTag@ha
+addi r3, r3, ksys_act_hasTag@l
+mtctr r3
+lwz r3, 0x08(r1) ; r3 = Weapon*
+addi r3, r3, 0x610
+lis r4, -0x438E
+addi r4, r4, 0x3F22 # Tag_IsEquipStand (0xBC723F22)
+bctrl
+cmpwi r3, 1 ; skip if weapon is held by EquipStand
+beq exit_hook_enableWeapon
+
 ; call Weapon::isHolding
-lwz r4, 0xE8(r3)
-lwz r4, 0x4CC(r4)
+lwz r3, 0x08(r1) ; r3 = Weapon*
+lwz r4, 0xE8(r3) ; load vtable
+lwz r4, 0x4CC(r4) ; get Weapon::isHolding function pointer
 mtctr r4
 lwz r3, 0x08(r1) ; r3 = Weapon*
 lwz r4, 0x04(r1) ; r4 = Actor*
 bctrl
-
-mr r6, r3 ; r6 = Weapon::isHolding
+mr r6, r3 ; r6 = Weapon::isHolding()
 
 lwz r3, 0x08(r1) ; r3 = Weapon*
 lwz r4, 0x04(r1) ; r4 = Actor*
 ; get held index from Weapon*
-lwz r5, 0x6A4(r3)
+;lwz r5, 0x6A4(r3)
+lwz r5, 0x5F4(r3) ; r5 = Weapon::heldIndex
+
+
 bla import.coreinit.hook_EnableWeaponAttackSensor
 
-lwz r8, 0x08(r1)
+exit_hook_enableWeapon:
 lwz r7, 0x0C(r1)
 lwz r6, 0x10(r1)
 lwz r5, 0x14(r1)
