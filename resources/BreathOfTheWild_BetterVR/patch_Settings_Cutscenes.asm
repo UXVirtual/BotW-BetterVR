@@ -65,12 +65,12 @@ data_TableOfCutsceneEventsSettings:
 .string "Demo007_0,FP_ON,PAN_OFF,HND_OFF,CTRL_ON" ; name: Sleeping in bed demo
 .string "Demo007_1,FP_ON,PAN_OFF,HND_OFF,CTRL_ON" ; name: Passing time at a campfire demo
 .string "Demo007_2,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Sleeping in an inn (subflow) demo
-.string "Demo008_0,FP_OFF,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 1: door opening
-.string "Demo008_1,FP_OFF,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 2: elevator going down into shrine
-.string "Demo008_2,FP_OFF,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 3: arriving in dungeon
-.string "Demo008_3,FP_OFF,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 4: elevator going up back to main world
-.string "Demo008_4,FP_OFF,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 5: going outside shrine
-.string "Demo008_9,FP_OFF,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 1: door opening (for emergent lithograph)
+.string "Demo008_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 1: door opening
+.string "Demo008_1,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 2: elevator going down into shrine
+.string "Demo008_2,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 3: arriving in dungeon
+.string "Demo008_3,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 4: elevator going up back to main world
+.string "Demo008_4,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 5: going outside shrine
+.string "Demo008_9,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon entrance demo 1: door opening (for emergent lithograph)
 .string "Demo010_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Using the scope for the first time
 .string "Demo010_1,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Exiting the scope for the first time
 .string "Demo011_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Blood Moon
@@ -78,27 +78,27 @@ data_TableOfCutsceneEventsSettings:
 .string "Demo013_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Cucco angry demo
 .string "Demo014_0,FP_OFF,PAN_ON,HND_OFF,CTRL_OFF" ; name: Yiga assassin calling others demo
 .string "Demo016_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Dungeon appearing demo on pedestal activation
-.string "Demo017_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Hidden Korok found Demo
+.string "Demo017_0,FP_ON,PAN_ON,HND_OFF,CTRL_OFF" ; name: Hidden Korok found Demo
 .string "Demo018_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Rescue Demo
 .string "Demo019_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Retry Demo
 .string "Demo020_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Taking off from flight range demo
 .string "Demo021_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Arriving in sky demo
 .string "Demo022_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Demonstration at Teva with Do | skydiving at the divine beast
 .string "Demo023_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Assassin changing Demo
-.string "Demo024_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Door opening demo
+.string "Demo024_0,FP_ON,PAN_ON,HND_OFF,CTRL_OFF" ; name: Door opening demo
 .string "Demo024_1,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Door opening demo (Do not stop chemicals)
 .string "Demo024_2,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Door opening demo (do not stop actors and chemicals)
-.string "Demo025_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: General scene start demo
+.string "Demo025_0,FP_ON,PAN_ON,HND_OFF,CTRL_OFF" ; name: General scene start demo
 .string "Demo025_1,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: E3 only scene exit demo
 .string "Demo025_2,FP_OFF,PAN_ON,HND_OFF,CTRL_OFF" ; name: Title Scene Start Demo
-.string "Demo026_0,FP_ON,PAN_ON,HND_OFF,CTRL_OFF" ; name: Combat shrine: enemy appearing demo
-.string "Demo027_0,FP_ON,PAN_ON,HND_OFF,CTRL_OFF" ; name: Old Man Appears Demo (Common)
-.string "Demo027_2,FP_ON,PAN_ON,HND_OFF,CTRL_OFF" ; name: Old Man Camera Demo (under the tower)
+.string "Demo026_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Combat shrine: enemy appearing demo
+.string "Demo027_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Old Man Appears Demo (Common)
+.string "Demo027_2,FP_OFF,PAN_ON,HND_OFF,CTRL_OFF" ; name: Old Man Camera Demo (under the tower)
 .string "Demo028_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Great Fairy: Unlock Fountain Demo
 .string "Demo029_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Great Fairy: Upgrade Armor Demo
 .string "Demo030_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Malanya: Horse Resurrection Demo
 .string "Demo032_0,FP_ON,PAN_ON,HND_OFF,CTRL_OFF" ; name: Sheikah Slate repair demo
-.string "Demo033_0,FP_OFF,PAN_ON,HND_OFF,CTRL_OFF" ; name: CDungeon Monk Demo
+.string "Demo033_0,FP_ON,PAN_OFF,HND_ON,CTRL_OFF" ; name: CDungeon Monk Demo
 .string "Demo033_1,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: CDungeon Monk Demo (cleared)
 .string "Demo034_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Goddess Statue exchanging demo
 .string "Demo035_0,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF" ; name: Horned Statue demo
@@ -572,7 +572,7 @@ data_TableOfCutsceneEventsSettings:
 .string "Npc_King_Vagrant001,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
 .string "Npc_King_Vagrant003,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
 .string "Npc_King_Vagrant004,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
-.string "Npc_King_Vagrant005,FP_OFF,PAN_ON,HND_OFF,CTRL_OFF"
+.string "Npc_King_Vagrant005,FP_ON,PAN_ON,HND_OFF,CTRL_OFF"
 .string "Npc_King_Vagrant006,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
 .string "Npc_kokiri001,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
 .string "Npc_kokiri002,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
@@ -911,7 +911,7 @@ data_TableOfCutsceneEventsSettings:
 .string "ShieldofKolog_mini,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
 .string "SignalFlowchart,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
 .string "SignboardStone,FP_ON,PAN_OFF,HND_OFF,CTRL_ON"
-.string "SignboardWood,FP_OFF,PAN_ON,HND_OFF,CTRL_ON"
+.string "SignboardWood,FP_ON,PAN_OFF,HND_OFF,CTRL_ON" ; When Link reads signs
 .string "SignboardWood_Mamono,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
 .string "SnowBall,FP_OFF,PAN_ON,HND_OFF,CTRL_OFF"
 .string "Solitary_Maze,FP_ON,PAN_OFF,HND_OFF,CTRL_OFF"
