@@ -18,7 +18,7 @@
     },
     {
       "name": "imgui",
-      "version>=": "1.91.5#0"
+      "version>=": "1.91.9#0"
     },
     {
       "name": "implot3d",
