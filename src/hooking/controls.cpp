@@ -140,13 +140,12 @@ void CemuHooks::hook_InjectXRInput(PPCInterpreter_t* hCPU) {
     // fetching stick inputs
     XrActionStateVector2f& leftStickSource = gameState.in_game ? inputs.inGame.move : inputs.inMenu.navigate;
 
-    // check if we need to prevent inputs from happening
-    if (gameState.in_game != gameState.was_in_game) gameState.prevent_menu_input = true;
-    //if (!gameState.dpad_menu_open != gameState.was_dpad_menu_open) gameState.prevent_dpad_menu_input = true;
+    // check if we need to prevent inputs from happening (fix menu reopening when exiting it and grab object when quitting dpad menu)
+    if (gameState.in_game != gameState.was_in_game) gameState.prevent_specific_inputs = true;
 
     if (gameState.in_game) 
     {
-        if (!gameState.prevent_menu_input) {
+        if (!gameState.prevent_specific_inputs) {
             if (inputs.inGame.mapAndInventoryState.lastEvent == ButtonState::Event::LongPress) {
                 newXRBtnHold |= VPAD_BUTTON_MINUS;
                 gameState.map_open = true;
@@ -158,8 +157,11 @@ void CemuHooks::hook_InjectXRInput(PPCInterpreter_t* hCPU) {
         }
         else if (inputs.inGame.mapAndInventoryState.lastEvent == ButtonState::Event::None)
         {
-            gameState.prevent_menu_input = false;
+            //inputs to cancel
             inputs.inGame.mapAndInventoryState.resetButtonState();
+            inputs.inGame.grabState[0].resetButtonState();
+
+            gameState.prevent_specific_inputs = false;
         }
 
         newXRBtnHold |= mapXRButtonToVpad(inputs.inGame.jump, VPAD_BUTTON_X);
@@ -198,7 +200,7 @@ void CemuHooks::hook_InjectXRInput(PPCInterpreter_t* hCPU) {
         newXRBtnHold |= mapXRButtonToVpad(inputs.inGame.rightTrigger, VPAD_BUTTON_ZR);
     }
     else {
-        if (!gameState.prevent_menu_input)
+        if (!gameState.prevent_specific_inputs)
         {
             //Log::print<INFO>("map open : {}", inputs.inMenu.map_open);
             if (gameState.map_open)
@@ -209,7 +211,7 @@ void CemuHooks::hook_InjectXRInput(PPCInterpreter_t* hCPU) {
             }
         }
         else if (!inputs.inMenu.mapAndInventory.currentState)
-            gameState.prevent_menu_input = false;
+            gameState.prevent_specific_inputs = false;
 
        /* newXRBtnHold |= mapXRButtonToVpad(inputs.inMenu.mapAndInventory, VPAD_BUTTON_MINUS);*/
 

@@ -113,8 +113,7 @@ public:
         bool map_open = false;
         bool dpad_menu_open = false;
         bool was_dpad_menu_open = false;
-        bool prevent_menu_input = false;
-        //bool prevent_dpad_menu_input = false;
+        bool prevent_specific_inputs = false;
     } gameState ;
 
     std::atomic<GameState> m_gameState{};
