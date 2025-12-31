@@ -474,6 +474,8 @@ std::optional<OpenXR::InputState> OpenXR::UpdateActions(XrTime predictedFrameTim
     syncInfo.activeActionSets = &activeActionSet;
     checkXRResult(xrSyncActions(m_session, &syncInfo), "Failed to sync actions!");
 
+    const float playerHeightOffsetMeters = CemuHooks::GetSettings().playerHeightSetting.getLE();
+
     InputState newState = m_input.load();
     newState.inGame.in_game = !inMenu;
     newState.inGame.inputTime = predictedFrameTime;
@@ -564,6 +566,8 @@ std::optional<OpenXR::InputState> OpenXR::UpdateActions(XrTime predictedFrameTim
                     newState.inGame.poseVelocity[side].angularVelocity = { 0.0f, 0.0f, 0.0f };
                     checkXRResult(xrLocateSpace(m_handSpaces[side], m_stageSpace, predictedFrameTime, &spaceLocation), "Failed to get location from controllers!");
                     if ((spaceLocation.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0 && (spaceLocation.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0) {
+                        // raise/lower the tracked pose in stage space
+                        spaceLocation.pose.position.y += playerHeightOffsetMeters;
                         newState.inGame.poseLocation[side] = spaceLocation;
 
                         if ((spaceLocation.locationFlags & XR_SPACE_VELOCITY_LINEAR_VALID_BIT) != 0 && (spaceLocation.locationFlags & XR_SPACE_VELOCITY_ANGULAR_VALID_BIT) != 0) {
@@ -585,6 +589,7 @@ std::optional<OpenXR::InputState> OpenXR::UpdateActions(XrTime predictedFrameTim
                     XrSpaceLocation spaceLocation = { XR_TYPE_SPACE_LOCATION };
                     checkXRResult(xrLocateSpace(m_handSpaces[side], m_headSpace, predictedFrameTime, &spaceLocation), "Failed to get location from controllers!");
                     if ((spaceLocation.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0 && (spaceLocation.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0) {
+                        spaceLocation.pose.position.y += playerHeightOffsetMeters;
                         newState.inGame.hmdRelativePoseLocation[side] = spaceLocation;
                     }
                 }
@@ -637,7 +642,6 @@ std::optional<OpenXR::InputState> OpenXR::UpdateActions(XrTime predictedFrameTim
         getCancelInfo.subactionPath = XR_NULL_PATH;
         newState.inGame.cancel = { XR_TYPE_ACTION_STATE_BOOLEAN };
         checkXRResult(xrGetActionStateBoolean(m_session, &getCancelInfo, &newState.inGame.cancel), "Failed to get cancel action value!");
-
 
         XrActionStateGetInfo getJumpInfo = { XR_TYPE_ACTION_STATE_GET_INFO };
         getJumpInfo.action = m_jumpAction;

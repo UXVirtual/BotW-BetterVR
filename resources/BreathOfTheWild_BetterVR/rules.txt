@@ -14,7 +14,7 @@ $cropFlatTo16_9:int = 1
 $guiFollowMode:int = 1
 
 $cameraDistance = 0.5
-$cameraHeight = -0.5
+$cameraHeight = 0.0
 $enableDebugOverlay:int = 0
 $leftHanded:int = 0
 $buggyAngularVelocity:int = 0 # Whether the angular velocity is wrongly provided in local space. Possible Values: 0 is auto; 1 is forced on; 2 is forced off
@@ -28,6 +28,7 @@ $cutsceneBlackBars:int = 1
 name = Third-Person Camera (Most Stable & Casual, Seated Recommended)
 category = Camera Mode
 $cameraMode = 0
+$cameraHeight = 0
 
 [Preset]
 name = First-Person Camera (Most Immersive, Standing Recommended)
@@ -132,31 +133,80 @@ category = GUI Follow Mode
 $guiFollowMode:int = 0
 
 
-# First Person - Height Offset
-# [Preset]
-# name = Small
-# category = Height In First Person
-# condition = $cameraMode == 1
-# $cameraHeight = -1.0
-# 
-# [Preset]
-# name = Normal (Default)
-# category = Height In First Person
-# condition = $cameraMode == 1
-# default = 1
-# $cameraHeight = -0.5
-# 
-# [Preset]
-# name = Tall (VFX Might Be Offset)
-# category = Height In First Person
-# condition = $cameraMode == 1
-# $cameraHeight = 0.0
-# 
-# [Preset]
-# name = Really Tall (VFX Might Be Offset)
-# category = Height In First Person
-# condition = $cameraMode == 1
-# $cameraHeight = 10.0
+# First Person - Camera Height / Eye Level
+
+[Preset]
+name = Short (-0.20m)
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = -0.20
+
+[Preset]
+name = -0.15m
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = -0.15
+
+[Preset]
+name = Slightly Short (-0.10m)
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = -0.10
+
+[Preset]
+name = -0.05m
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = -0.05
+
+[Preset]
+name = Default (0.00m)
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+default = 1
+$cameraHeight = 0.00
+
+[Preset]
+name = +0.05m
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = 0.05
+
+[Preset]
+name = Slightly Taller (+0.10m)
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = 0.10
+
+[Preset]
+name = +0.15m
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = 0.15
+
+[Preset]
+name = Tall (+0.20m)
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = 0.20
+
+[Preset]
+name = +0.25m
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = 0.25
+
+[Preset]
+name = +0.30m
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = 0.30
+
+[Preset]
+name = Very Tall (+0.35m)
+category = Player Height Offset (for seated play)
+condition = $cameraMode == 1
+$cameraHeight = 0.35
 
 
 # Third Person - Camera Distance
