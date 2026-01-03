@@ -42,15 +42,12 @@ While more integrated solutions are being found out, there's probably ways to se
 >
 > **Critical Issues:**
 > * Gravity is higher. Jumping isn't affected, but some shrines might require creative solutions/glitches for now.
-> * Weapons might deregister after it breaks. You might have to drop and pick it up again.
+> * Weapons might deregister rarely (after breaking?). You might have to drop and pick it up again.
 > * ~~Third-person mode (and cutscenes) often has the player being partially/largely invisible.~~ This is fixed now!
 > * ~~Climbing ladders requires looking away with the camera using your controller stick.~~ This is fixed now!
 > * ~~Some towers can't be unlocked and cause the cutscene to softlock.~~ This is fixed now!
 > * ~~Our AMD GPU system has a crash after the load screen, which we're working on fixing.~~ This is fixed now!
 > * ~~**Weapon Glitch:** Sometimes weapons will stop registering hits on enemies.~~
->   * ~~*Quick Fix:* Quickly drop and pick up your weapon (`Right Grip` + `R-Stick Down`).~~
->   * ~~*Alt Fix:* Throw the weapon or cycle through weapons in the inventory menu.~~
->   * ~~*Last Resort:* Teleport to a tower/shrine or reload your save.~~
 
 **Audio & Visuals**
 - Slight audio crackling may occur when loading the game or opening menus quickly.
